@@ -3,7 +3,7 @@
 Reusable Google Earth Engine workflows for hydrology, remote sensing and geospatial analysis.
 
 <p align="center">
-  <img src="assets/banner.png" width="100%">
+  <img src="assets/gee_geospatial_toolkit.png" width="100%">
 </p>
 
 ---
