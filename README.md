@@ -252,7 +252,7 @@ Additional documentation is available in the `docs/` directory.
 If this repository contributes to your research, please cite it.
 
 ```bibtex
-@software{vieira2026,
+@software{xdv2026,
   author = {Danilo Vieira},
   title = {GEE Geospatial Toolkit},
   year = {2026}
