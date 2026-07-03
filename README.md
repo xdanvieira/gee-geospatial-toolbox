@@ -22,13 +22,13 @@ The toolkit provides modular workflows that can be used independently or combine
 gee-geospatial-toolkit
 
 ├── hydrology/
+├── irrigation/
 ├── satellite/
 ├── vegetation/
 ├── climate/
 ├── utilities/
 ├── examples/
 └── docs/
-```
 
 ---
 
