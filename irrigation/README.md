@@ -36,7 +36,7 @@ Continuous score representing potential irrigated areas.
 
 ### High Confidence Areas (P95)
 
-![P95](../assets/irrigation/high_confidence_p95.png)
+![P95](../assets/irrigation/high_confidence.png)
 
 Pixels above the 95th percentile representing the most reliable irrigation candidates.
 
@@ -44,7 +44,7 @@ Pixels above the 95th percentile representing the most reliable irrigation candi
 
 ### Top 30 Priority Locations
 
-![Top30](../assets/irrigation/top30_priority_points.png)
+![Top30](../assets/irrigation/top30.png)
 
 Highest-ranked locations selected for field verification and environmental inspection.
 
