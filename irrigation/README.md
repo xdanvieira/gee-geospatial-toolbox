@@ -23,6 +23,31 @@ The workflow compares wet and dry season Sentinel-2 composites and calculates a 
 - Minimum valid observation count
 - P95 threshold for high-confidence areas
 
+
+## Example Results
+
+### Irrigation Suitability Score
+
+![Score](../assets/irrigation/score_irrigation.png)
+
+Continuous score representing potential irrigated areas.
+
+---
+
+### High Confidence Areas (P95)
+
+![P95](../assets/irrigation/high_confidence_p95.png)
+
+Pixels above the 95th percentile representing the most reliable irrigation candidates.
+
+---
+
+### Top 30 Priority Locations
+
+![Top30](../assets/irrigation/top30_priority_points.png)
+
+Highest-ranked locations selected for field verification and environmental inspection.
+
 ---
 
 ## Outputs
