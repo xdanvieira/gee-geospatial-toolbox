@@ -48,7 +48,7 @@ Each module can be executed independently while maintaining compatibility with t
 |----------|-------------|
 | **Hydrology** | Hydrological indicators, water balance, runoff, evapotranspiration and drought assessment. |
 | **Climate** | SPI, precipitation analysis, climate indicators and forecast integration. |
-| **Satellite** | Satellite preprocessing and visualization workflows. |
+| **Remote Sensing** | Satellite preprocessing and visualization workflows. |
 | **Irrigation** | Irrigation suitability assessment and water-use monitoring. |
 | **Vegetation** | Vegetation indices and ecosystem monitoring *(under development).* |
 | **Utilities** | Shared helper functions *(under development).* |
@@ -71,7 +71,7 @@ hydrology/
 
 climate/
 
-satellite/
+remote_sensing/
 
 irrigation/
 
@@ -116,7 +116,7 @@ Current capabilities
 
 ---
 
-## Satellite
+## Remote Sensing
 
 Satellite image preprocessing workflows.
 
@@ -201,7 +201,7 @@ gee-geospatial-toolkit/
 │   ├── hydrology/
 │   ├── climate/
 │   ├── irrigation/
-│   ├── satellite/
+│   ├── remote_semsing/
 │   ├── vegetation/
 │   └── sebal/
 │
@@ -223,7 +223,7 @@ gee-geospatial-toolkit/
 │   ├── era5/
 │   └── chirps/
 │
-├── satellite/
+├── remote_sensing/
 │   ├── README.md
 │   ├── sentinel2/
 │   │   └── export_rgb_composite.js
@@ -263,7 +263,7 @@ Environmental Indicators
           │
  ┌────────┼────────┬────────┬────────┐
  ▼        ▼        ▼        ▼
-Hydrology Climate Satellite Irrigation
+Hydrology Climate Remote_Sensing Irrigation
           │
           ▼
 Maps
@@ -401,7 +401,7 @@ Each module includes its own documentation.
 |----------|---------------|
 | Hydrology | `hydrology/README.md` |
 | Climate | `climate/README.md` |
-| Satellite | `satellite/README.md` |
+| Remote Sensing | `remote_sensing/README.md` |
 | Irrigation | `irrigation/README.md` |
 
 Additional technical documentation will be available in the **docs/** directory.
@@ -440,7 +440,7 @@ The toolkit currently provides reusable workflows for hydrology, climate monitor
 
 ---
 
-## Satellite
+## Remote Sensing
 
 | Workflow | Description | Status |
 |----------|-------------|:------:|
