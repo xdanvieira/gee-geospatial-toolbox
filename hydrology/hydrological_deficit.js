@@ -1,213 +1,204 @@
 // ======================================================
-// PAINEL HIDROLÓGICO INSTITUCIONAL – FISCALIZAÇÃO
-// Déficit Hídrico + Vazão + Exportação Automática
-// Bacia Paramirim – Bahia
+// Hydrological Water Deficit – Simplified Demo
+// Google Earth Engine + CHIRPS
+// Public educational version
+// ======================================================
+//
+// This script estimates monthly water deficit using:
+// - CHIRPS precipitation
+// - A fixed reference evapotranspiration value
+//
+// Water Deficit = Precipitation - Reference ET
+//
+// Note:
+// This is a simplified educational demo.
+// It is not an operational hydrological model.
 // ======================================================
 
 
 // ============================
-// 1️⃣ CONFIGURAÇÕES
+// 1. PARAMETERS
 // ============================
 
 var year = 2023;
 
-var territorio = ee.FeatureCollection(
-  "projects/ee-xdanvieira2/assets/bacia-paramirim2"
+// Draw or import your area of interest in Google Earth Engine
+
+var region = ee.FeatureCollection(
+  'projects/ee-xdanvieira2/assets/bacia-paramirim2'
 );
 
-Map.centerObject(territorio, 9);
-Map.addLayer(territorio, {color: 'black'}, 'Bacia');
 
-var months = ee.List.sequence(1,12);
+Map.centerObject(region, 8);
+Map.addLayer(region, {color: 'black'}, 'Study Area');
+
+var months = ee.List.sequence(1, 12);
+
+// Fixed monthly reference evapotranspiration value in mm
+var referenceET = 120;
 
 
 // ============================
-// 2️⃣ COLEÇÃO MENSAL
+// 2. MONTHLY WATER DEFICIT COLLECTION
 // ============================
 
-var colecaoMensal = ee.ImageCollection(
-  months.map(function(m){
+var monthlyCollection = ee.ImageCollection(
+  months.map(function(month) {
 
-    var start = ee.Date.fromYMD(year, m, 1);
-    var end   = start.advance(1,'month');
+    var start = ee.Date.fromYMD(year, month, 1);
+    var end = start.advance(1, 'month');
 
-    // --------------------------
-    // PRECIPITAÇÃO (CHIRPS)
-    // --------------------------
-    var P = ee.ImageCollection("UCSB-CHG/CHIRPS/DAILY")
+    var precipitation = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
       .filterDate(start, end)
-      .filterBounds(territorio)
+      .filterBounds(region)
       .sum()
-      .rename('P');
+      .rename('Precipitation');
 
-    // --------------------------
-    // ET OPERACIONAL MÉDIA
-    // (valor médio regional mensal)
-    // --------------------------
-    var ET = ee.Image.constant(120).rename('ET');
+    var et = ee.Image.constant(referenceET)
+      .rename('Reference_ET');
 
-    // --------------------------
-    // DÉFICIT
-    // --------------------------
-    var deficit = P.subtract(ET).rename('Deficit');
+    var waterDeficit = precipitation
+      .subtract(et)
+      .rename('Water_Deficit');
 
-    // --------------------------
-    // RUNOFF (GLDAS)
-    // --------------------------
-    var runoff = ee.ImageCollection("NASA/GLDAS/V021/NOAH/G025/T3H")
-      .filterDate(start, end)
-      .select('Qs_acc')
-      .mean()
-      .rename('Runoff');
-
-    return P.addBands(ET)
-            .addBands(deficit)
-            .addBands(runoff)
-            .set('month', m)
-            .set('system:time_start', start.millis())
-            .clip(territorio);
+    return precipitation
+      .addBands(et)
+      .addBands(waterDeficit)
+      .set('month', month)
+      .set('system:time_start', start.millis())
+      .clip(region);
   })
 );
 
 
 // ============================
-// 3️⃣ VISUALIZAÇÃO – MÊS SELECIONADO
+// 3. MAP VISUALIZATION
 // ============================
 
-var mesSelecionado = 1; // altere 1–12
+var selectedMonth = 1; // Change from 1 to 12
 
-var imagemMes = ee.Image(
-  colecaoMensal.filter(ee.Filter.eq('month', mesSelecionado)).first()
+var monthlyImage = ee.Image(
+  monthlyCollection
+    .filter(ee.Filter.eq('month', selectedMonth))
+    .first()
 );
 
+Map.addLayer(monthlyImage.select('Precipitation'), {
+  min: 0,
+  max: 300,
+  palette: ['white', 'lightblue', 'blue', 'darkblue']
+}, 'Monthly Precipitation');
 
-// --- Precipitação ---
-Map.addLayer(imagemMes.select('P'), {
-  min:0,
-  max:300,
-  palette:['white','lightblue','blue','darkblue']
-}, 'Precipitação (mm)');
-
-
-// --- Déficit ---
-Map.addLayer(imagemMes.select('Deficit'), {
-  min:-200,
-  max:200,
-  palette:['red','orange','white','lightblue','darkblue']
-}, 'Déficit (P - ET)');
+Map.addLayer(monthlyImage.select('Water_Deficit'), {
+  min: -200,
+  max: 200,
+  palette: ['red', 'orange', 'white', 'lightblue', 'darkblue']
+}, 'Monthly Water Deficit');
 
 
 // ============================
-// 4️⃣ GRÁFICOS MENSAIS
+// 4. MONTHLY CHARTS
 // ============================
 
-var chartP = ui.Chart.image.series({
-  imageCollection: colecaoMensal.select('P'),
-  region: territorio,
+var precipitationChart = ui.Chart.image.series({
+  imageCollection: monthlyCollection.select('Precipitation'),
+  region: region,
   reducer: ee.Reducer.mean(),
   scale: 5000
 }).setOptions({
-  title: 'Precipitação Mensal (mm)',
+  title: 'Monthly Precipitation',
   vAxis: {title: 'mm'},
+  hAxis: {title: 'Month'},
   lineWidth: 2,
   pointSize: 4,
   colors: ['blue']
 });
-print(chartP);
+
+print(precipitationChart);
 
 
-var chartDeficit = ui.Chart.image.series({
-  imageCollection: colecaoMensal.select('Deficit'),
-  region: territorio,
+var deficitChart = ui.Chart.image.series({
+  imageCollection: monthlyCollection.select('Water_Deficit'),
+  region: region,
   reducer: ee.Reducer.mean(),
   scale: 5000
 }).setOptions({
-  title: 'Déficit Hídrico Mensal (P - ET)',
+  title: 'Monthly Water Deficit',
   vAxis: {title: 'mm'},
+  hAxis: {title: 'Month'},
   lineWidth: 2,
   pointSize: 4,
   colors: ['red']
 });
-print(chartDeficit);
 
-
-var chartRunoff = ui.Chart.image.series({
-  imageCollection: colecaoMensal.select('Runoff'),
-  region: territorio,
-  reducer: ee.Reducer.mean(),
-  scale: 25000
-}).setOptions({
-  title: 'Runoff Mensal (GLDAS)',
-  vAxis: {title: 'Runoff'},
-  lineWidth: 2,
-  pointSize: 4,
-  colors: ['darkblue']
-});
-print(chartRunoff);
+print(deficitChart);
 
 
 // ============================
-// 5️⃣ EXPORTAÇÃO AUTOMÁTICA
+// 5. ANNUAL WATER DEFICIT
 // ============================
 
-// --- Déficit anual médio ---
-var deficitAnual = colecaoMensal.select('Deficit').mean();
+var annualDeficit = monthlyCollection
+  .select('Water_Deficit')
+  .mean()
+  .rename('Annual_Mean_Water_Deficit');
+
+Map.addLayer(annualDeficit, {
+  min: -200,
+  max: 200,
+  palette: ['red', 'orange', 'white', 'lightblue', 'darkblue']
+}, 'Annual Mean Water Deficit');
+
+
+// ============================
+// 6. EXPORT IMAGE
+// ============================
 
 Export.image.toDrive({
-  image: deficitAnual,
-  description: 'Deficit_Hidrico_Anual_' + year,
-  folder: 'Hidrologia_Paramirim',
-  fileNamePrefix: 'Deficit_Anual_' + year,
-  region: territorio.geometry(),
-  scale: 1000,
+  image: annualDeficit,
+  description: 'Annual_Water_Deficit_Demo_' + year,
+  fileNamePrefix: 'Annual_Water_Deficit_Demo_' + year,
+  region: region,
+  scale: 5000,
   maxPixels: 1e13
 });
 
 
-// --- Exportação mensal ---
-months.getInfo().forEach(function(m){
+// ============================
+// 7. EXPORT MONTHLY TABLE
+// ============================
 
-  var img = colecaoMensal
-    .filter(ee.Filter.eq('month', m))
-    .first()
-    .select('Deficit');
+var monthlyTable = monthlyCollection.map(function(image) {
 
-  Export.image.toDrive({
-    image: img,
-    description: 'Deficit_' + year + '_Mes_' + m,
-    folder: 'Hidrologia_Paramirim',
-    fileNamePrefix: 'Deficit_' + year + '_Mes_' + m,
-    region: territorio.geometry(),
-    scale: 1000,
-    maxPixels: 1e13
-  });
-
-});
-
-
-// --- Tabela CSV mensal ---
-var tabelaMensal = colecaoMensal.map(function(img){
-
-  var media = img.select('Deficit')
+  var stats = image.select(['Precipitation', 'Water_Deficit'])
     .reduceRegion({
       reducer: ee.Reducer.mean(),
-      geometry: territorio,
+      geometry: region,
       scale: 5000,
       maxPixels: 1e13
     });
 
   return ee.Feature(null, {
-    'Ano': year,
-    'Mes': img.get('month'),
-    'Deficit_mm': media.get('Deficit')
+    'Year': year,
+    'Month': image.get('month'),
+    'Mean_Precipitation_mm': stats.get('Precipitation'),
+    'Mean_Water_Deficit_mm': stats.get('Water_Deficit')
   });
 
 });
 
 Export.table.toDrive({
-  collection: tabelaMensal,
-  description: 'Tabela_Deficit_Mensal_' + year,
-  folder: 'Hidrologia_Paramirim',
-  fileNamePrefix: 'Tabela_Deficit_Mensal_' + year,
+  collection: monthlyTable,
+  description: 'Monthly_Water_Deficit_Table_' + year,
+  fileNamePrefix: 'Monthly_Water_Deficit_Table_' + year,
   fileFormat: 'CSV'
 });
+
+
+// ============================
+// 8. CONSOLE OUTPUT
+// ============================
+
+print('Monthly collection:', monthlyCollection);
+print('Annual mean water deficit:', annualDeficit);
+print('Monthly summary table:', monthlyTable);
